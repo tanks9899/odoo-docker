@@ -79,15 +79,13 @@ RUN useradd -m -d /var/lib/odoo -U -r -s /bin/bash odoo
 
 # Copy your own Odoo source code
 COPY . /opt/odoo
-    
-# Install Python dependencies, create symlink for odoo command and set correct ownership
+
+# Install Python dependencies and set correct ownership
 RUN pip3 install --no-cache-dir --break-system-packages -r /opt/odoo/requirements.txt \
-    && ln -s /opt/odoo/odoo-bin /usr/local/bin/odoo \
     && chown -R odoo /opt/odoo \
     && chown -R odoo /var/lib/odoo
 
-# Copy entrypoint script and Odoo configuration file
-COPY ./entrypoint.sh /
+# Copy Odoo configuration file
 COPY ./odoo.conf /etc/odoo/
 
 # Set permissions and Mount /var/lib/odoo to allow restoring filestore and /mnt/extra-addons for users addons
@@ -99,13 +97,7 @@ VOLUME ["/var/lib/odoo", "/mnt/extra-addons"]
 # Expose Odoo services
 EXPOSE 8069 8071 8072
 
-# Set the default config file
-ENV ODOO_RC /etc/odoo/odoo.conf
-
-COPY wait-for-psql.py /usr/local/bin/wait-for-psql.py
-
 # Set default user when running the container
 USER odoo
 
-ENTRYPOINT ["/entrypoint.sh"]
-CMD ["odoo"]
+CMD ["/opt/odoo/odoo-bin", "--config=/etc/odoo/odoo.conf"]

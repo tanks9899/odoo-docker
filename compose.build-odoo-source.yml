@@ -3,7 +3,8 @@ services:
     build:
       context: .
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     ports:
       - "8069:8069"
     volumes:
@@ -11,27 +12,24 @@ services:
       - .:/opt/odoo
       - ./odoo.conf:/etc/odoo/odoo.conf
       - ./addons:/mnt/extra-addons
-    environment:
-      - PASSWORD_FILE=/run/secrets/postgresql_password
-    secrets:
-      - postgresql_password
+
   db:
     image: postgres:16
     ports:
       - "5432:5432"
     environment:
       - POSTGRES_DB=postgres
-      - POSTGRES_PASSWORD_FILE=/run/secrets/postgresql_password
+      - POSTGRES_PASSWORD=odoo
       - POSTGRES_USER=odoo
       - PGDATA=/var/lib/postgresql/data/pgdata
     volumes:
       - odoo-db-data:/var/lib/postgresql/data/pgdata
-    secrets:
-      - postgresql_password
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
 volumes:
   odoo-web-data:
   odoo-db-data:
-
-secrets:
-  postgresql_password:
-    file: odoo_pg_pass
