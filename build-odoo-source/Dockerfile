@@ -75,7 +75,7 @@ RUN echo 'deb http://apt.postgresql.org/pub/repos/apt/ noble-pgdg main' > /etc/a
 RUN npm install -g rtlcss
 
 # Create odoo user
-RUN useradd -m -d /var/lib/odoo -U -r -s /bin/bash odoo
+RUN useradd -ms /bin/bash odoo
 
 # Copy your own Odoo source code
 COPY . /opt/odoo
@@ -83,6 +83,7 @@ COPY . /opt/odoo
 # Install Python dependencies and set correct ownership
 RUN pip3 install --no-cache-dir --break-system-packages -r /opt/odoo/requirements.txt \
     && chown -R odoo /opt/odoo \
+    && mkdir -p /var/lib/odoo \
     && chown -R odoo /var/lib/odoo
 
 # Copy Odoo configuration file
