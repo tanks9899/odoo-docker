@@ -11,7 +11,7 @@ services:
       - odoo-web-data:/var/lib/odoo
       - .:/opt/odoo
       - ./odoo.conf:/etc/odoo/odoo.conf
-      - ./addons:/mnt/extra-addons
+      - ../odoo-addons:/mnt/extra-addons
 
   db:
     image: postgres:16

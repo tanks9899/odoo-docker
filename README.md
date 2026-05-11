@@ -86,7 +86,10 @@ The PostgreSQL connection uses hardcoded credentials (`odoo`/`odoo`) defined in 
 
 ## Custom modules
 
-Place custom addon modules in the `addons/` directory. Both stacks mount it to `/mnt/extra-addons` inside the container.
+The two stacks mount addons from different locations:
+
+- **Nightly build** — place modules in `addons/` inside this repo (`./addons → /mnt/extra-addons`).
+- **Source build** — place modules in an `odoo-addons/` directory that sits **alongside** this repo (`../odoo-addons → /mnt/extra-addons`).
 
 ## Runtime config override
 
