@@ -70,17 +70,58 @@ Use this when you want to run Odoo directly from a local source tree — for exa
 
 ### Setup
 
-Place your Odoo source tree (containing `odoo-bin` and `requirements.txt`) inside `build-odoo-source/`.
+#### 1. Clone the repositories
+
+Open a terminal in the parent directory where you want to keep both repos, then run:
+
+```bash
+git clone https://github.com/odoo/odoo.git
+```
+
+The `odoo-addons/` directory is your own — either create it manually or clone your own add-ons repository:
+
+```bash
+# Option A: create an empty folder
+mkdir odoo-addons
+
+# Option B: clone your own repository
+git clone <your-addons-repo-url> odoo-addons
+```
+
+#### 2. Copy the Docker files into the Odoo repo
+
+Copy the following files from `build-odoo-source/` in this repository into the cloned `odoo/` folder:
+
+| Source (this repo) | Destination |
+|---|---|
+| `build-odoo-source/Dockerfile` | `odoo/Dockerfile` |
+| `compose.build-odoo-source.yml` | `odoo/compose.yml` |
+| `build-odoo-source/odoo.conf` | `odoo/odoo.conf` |
+
+Your directory structure should look like this:
+
+```
+<parent-dir>/
+├── odoo/
+│   ├── Dockerfile
+│   ├── compose.yml
+│   ├── odoo.conf
+│   └── ... (Odoo source files)
+└── odoo-addons/
+    └── ... (custom add-ons)
+```
 
 ### Running
 
+From inside the `odoo/` directory:
+
 ```bash
-docker compose -f compose.build-odoo-source.yml up -d
+docker compose up -d
 ```
 
-The entire `build-odoo-source/` directory is bind-mounted to `/opt/odoo` inside the container, so source changes are reflected without rebuilding the image.
+The entire `odoo/` directory is bind-mounted to `/opt/odoo` inside the container, so source changes are reflected without rebuilding the image.
 
-The PostgreSQL connection uses hardcoded credentials (`odoo`/`odoo`) defined in `build-odoo-source/odoo.conf` and the compose file — no Docker secret required.
+The PostgreSQL connection uses hardcoded credentials (`odoo`/`odoo`) defined in `odoo.conf` and the compose file — no Docker secret required.
 
 ---
 
@@ -89,9 +130,9 @@ The PostgreSQL connection uses hardcoded credentials (`odoo`/`odoo`) defined in 
 The two stacks mount addons from different locations:
 
 - **Nightly build** — place modules in `addons/` inside this repo (`./addons → /mnt/extra-addons`).
-- **Source build** — place modules in an `odoo-addons/` directory that sits **alongside** this repo (`../odoo-addons → /mnt/extra-addons`).
+- **Source build** — place modules in an `odoo-addons/` directory that sits **alongside** the `odoo/` repo (`../odoo-addons → /mnt/extra-addons`).
 
 ## Runtime config override
 
 - **Nightly build** — `config/odoo.conf` is bind-mounted into the container at `/etc/odoo`, overriding the config baked into the image. Edit this file to customise options without rebuilding.
-- **Source build** — `build-odoo-source/odoo.conf` is bind-mounted directly to `/etc/odoo/odoo.conf` inside the container. Edit this file to customise options without rebuilding.
+- **Source build** — `odoo.conf` (copied into the `odoo/` repo root) is bind-mounted directly to `/etc/odoo/odoo.conf` inside the container. Edit this file to customise options without rebuilding.
